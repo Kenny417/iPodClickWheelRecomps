@@ -73,9 +73,55 @@ mkdir -p "$stage/lib/$abi"
 "$ANDROID_BUILD_TOOLS/d8" --release --min-api 21 --lib "$ANDROID_PLATFORM_JAR" \
     --output "$stage" "$SDL3_ANDROID"/share/java/SDL3/SDL3-*.jar
 
-# The manifest. No resources of our own: the label is a literal and the theme is the framework's.
+# The launcher icon, if there is one. It is the game's own artwork, so — like the icon the Switch
+# build carries — it is not in the repository and the person building supplies it (../.gitignore).
+# A tree without one still has to build, and an app without an icon installs perfectly well with
+# the system's default, so this is not an error.
+#
+# The `android:icon` attribute is added here rather than kept in the manifest because a manifest
+# that names an icon does not link without one: carrying it would make the artwork compulsory,
+# which is the opposite of what the line above says.
+icon="$here/android/icon.png"
+manifest="$stage/AndroidManifest.xml"
+cp "$here/android/AndroidManifest.xml" "$manifest"
+resources=""
+if [ -f "$icon" ]; then
+    mkdir -p "$stage/res/mipmap-xxxhdpi"
+    cp "$icon" "$stage/res/mipmap-xxxhdpi/ic_launcher.png"
+    # Since Android 8 a launcher cuts each icon to a shape of its own — a circle, a squircle —
+    # and an app that offers a plain square stays a square among circles. An adaptive icon hands
+    # over two layers and lets the launcher cut what it likes. `ic_launcher` resolves to this
+    # file on Android 8 and newer and to the plain PNG below that, so both are named the same.
+    #
+    # The XML is written here rather than kept in android/ because a resource that names layers
+    # will not link without them, and a tree with no artwork still has to build.
+    if [ -f "$here/android/icon-foreground.png" ] && [ -f "$here/android/icon-background.png" ]
+    then
+        cp "$here/android/icon-foreground.png" "$stage/res/mipmap-xxxhdpi/ic_launcher_foreground.png"
+        cp "$here/android/icon-background.png" "$stage/res/mipmap-xxxhdpi/ic_launcher_background.png"
+        mkdir -p "$stage/res/mipmap-anydpi-v26"
+        cat > "$stage/res/mipmap-anydpi-v26/ic_launcher.xml" <<'ADAPTIVE'
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>
+ADAPTIVE
+    else
+        echo "android-build.sh: no adaptive layers — the icon will not be masked on Android 8+"
+        echo "    (tools/android-icon.py makes them from a piece of the game's artwork)"
+    fi
+    "$ANDROID_BUILD_TOOLS/aapt2" compile --dir "$stage/res" -o "$stage/res.zip"
+    resources="$stage/res.zip"
+    sed -i 's|<application |<application android:icon="@mipmap/ic_launcher" |' "$manifest"
+else
+    echo "android-build.sh: no android/icon.png — building without a launcher icon"
+fi
+
+# The manifest, and the icon's resource table where there is one. The label is a literal and the
+# theme is the framework's, so nothing else here needs a resource of its own.
 "$ANDROID_BUILD_TOOLS/aapt2" link -I "$ANDROID_PLATFORM_JAR" \
-    --manifest "$here/android/AndroidManifest.xml" -o "$stage/base.apk" \
+    --manifest "$manifest" ${resources:+-R "$resources"} -o "$stage/base.apk" \
     --min-sdk-version 21 --target-sdk-version 35
 
 # The libraries. Stripped: the debug information is a tenth of the download and nothing on the
