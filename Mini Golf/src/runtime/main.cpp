@@ -38,6 +38,15 @@
 #if defined(_WIN32)
 #include <windows.h>
 #endif
+// Android starts a program from Java: SDL's activity loads the build as a shared library and
+// calls SDL_main rather than main, so the entry point below has to be renamed. SDL_main.h is
+// what does the renaming — it is where SDL_MAIN_NEEDED is defined, and it is deliberately not
+// pulled in by SDL.h. Only the SDL build wants it, and this file is also compiled into the
+// headless build, which has no SDL at all; so the title's CMakeLists.txt defines this for the
+// SDL target alone.
+#if defined(MINIGOLF_SDL3_MAIN)
+#include <SDL3/SDL_main.h>
+#endif
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
