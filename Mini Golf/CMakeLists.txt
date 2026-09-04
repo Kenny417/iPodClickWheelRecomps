@@ -320,6 +320,10 @@ if(MINIGOLF_SDL3 AND SDL3_SOURCES)
             # ship no Java of its own — no subclass to write, nothing to compile — so the file is
             # named for whatever loads it rather than for the game inside it.
             set_target_properties(minigolf PROPERTIES OUTPUT_NAME main)
+            # The NDK's media library, for the AAC decoder the music goes through
+            # (common/src/ipod/platform/sdl3/music_decoder.cpp). It is the system's own codec,
+            # the same bargain macOS and Windows make, and it ships with every Android since 5.0.
+            target_link_libraries(minigolf PRIVATE mediandk)
         endif()
     else()
         minigolf_add_executable(minigolf "${SDL3_SOURCES}")

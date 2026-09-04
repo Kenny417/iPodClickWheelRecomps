@@ -36,6 +36,7 @@
 #include <SDL3/SDL.h>
 
 #include <algorithm>
+#include <cstdarg>
 #include <atomic>
 #include <cmath>
 #include <cstdio>
@@ -99,6 +100,22 @@ bool trace_input() {
 bool trace_audio() {
     static const bool on = SDL_getenv("MINIGOLF_TRACE_AUDIO") != nullptr;
     return on;
+}
+
+// Where that goes. A terminal, everywhere there is one; on Android stderr reaches nobody, so it
+// goes to the log `adb logcat` shows — which is where the message saying there was no decoder
+// had been going nowhere all along.
+void say_audio(const char* format, ...) __attribute__((format(printf, 1, 2)));
+void say_audio(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+#if defined(__ANDROID__)
+    SDL_LogMessageV(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, format, args);
+#else
+    std::vfprintf(stderr, format, args);
+    std::fputc('\n', stderr);
+#endif
+    va_end(args);
 }
 constexpr size_t VOICE_LIMIT = 4;                 // the device's sound-effect polyphony
 constexpr Uint64 TITLE_REFRESH_NS = 500'000'000;  // how often the frame rate in the title updates
@@ -236,7 +253,7 @@ public:
         if (!music_decoding_supported()) {
             if (!warned_) {
                 warned_ = true;
-                std::fprintf(stderr, "music: no decoder in this build (wanted %s)\n", path.c_str());
+                say_audio("music: no decoder in this build (wanted %s)", path.c_str());
             }
             return;
         }
@@ -245,7 +262,7 @@ public:
             return;  // the decoder has said why
         }
         if (trace_audio()) {
-            std::fprintf(stderr, "audio: music %s (%d Hz, %d ch)%s\n", path.c_str(), spec.freq,
+            say_audio("audio: music %s (%d Hz, %d ch)%s", path.c_str(), spec.freq,
                          spec.channels, repeat ? ", repeating" : "");
         }
         repeat_ = repeat;
@@ -260,7 +277,7 @@ public:
     // Silence it until another track is asked for. What Music: OFF does.
     void stop() {
         if (trace_audio() && decoder_.is_open()) {
-            std::fprintf(stderr, "audio: music stopped\n");
+            say_audio("audio: music stopped");
         }
         if (stream_ != nullptr) {
             SDL_ClearAudioStream(stream_);
@@ -282,7 +299,7 @@ public:
                     return;
                 }
                 if (trace_audio()) {
-                    std::fprintf(stderr, "audio: music looped\n");
+                    say_audio("audio: music looped");
                 }
                 decoder_.restart();
                 // A track that decodes to nothing at all would spin here for ever.
@@ -324,7 +341,7 @@ private:
             stream_ = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr,
                                                 nullptr);
             if (stream_ == nullptr) {
-                std::fprintf(stderr, "music: no audio device: %s\n", SDL_GetError());
+                say_audio("music: no audio device: %s", SDL_GetError());
                 return false;
             }
             (void)SDL_SetAudioStreamGain(stream_, gain_);
@@ -691,7 +708,7 @@ public:
 
     void play_sound(const std::string& wav_path, bool looping) override {
         if (trace_audio()) {
-            std::fprintf(stderr, "audio: sound %s%s\n", wav_path.c_str(),
+            say_audio("audio: sound %s%s", wav_path.c_str(),
                          looping ? " (looping)" : "");
         }
         const Clip* clip = clip_for(wav_path);
@@ -735,7 +752,7 @@ public:
     void set_audio_level(unsigned level) override {
         gain_ = static_cast<float>(level) / static_cast<float>(AUDIO_LEVEL_MAX);
         if (trace_audio()) {
-            std::fprintf(stderr, "audio: volume %u/%u (gain %.2f)\n", level, AUDIO_LEVEL_MAX,
+            say_audio("audio: volume %u/%u (gain %.2f)", level, AUDIO_LEVEL_MAX,
                          static_cast<double>(gain_));
         }
         for (Voice& voice : voices_) {

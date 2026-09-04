@@ -13,7 +13,7 @@ one of those games, translated from the ARM code the iPod ran into C++ that a mo
 
 For the first time in the last 20 years, these games are now playable on more than just an iPod! The six games support macOS, Linux and Windows, while Mini Golf also runs on the Nintendo Switch and on Android — which means an Android handheld with a real gamepad, like a Retroid, plays these with a D-pad and buttons rather than a keyboard. Adding support for new platforms is pretty easy; just look at how each recomp's platform works. 
 
-Linux and the two handheld builds have no settings window — that one is a Cocoa window on macOS and a Win32 one on Windows — and no background music, since the `.m4a` tracks need a decoder only those two systems supply. Everything else is the same game.
+Linux and the two handheld builds have no settings window — that one is a Cocoa window on macOS and a Win32 one on Windows. Background music plays everywhere except Linux and the Switch: the `.m4a` tracks need a decoder, and macOS, Windows and Android each have one of their own to borrow. Everything else is the same game.
 
 One difficult part about running these games on modern hardware is input. Each of these games expect a click wheel. Some expect it to be spun in certain directions, tapped at certain points, and/or clicked to access the buttons corresponding to its cardinal directions. The recomps aim to map it to what your machine does have: arrow keys, a gamepad stick, or the D-pad. I wouldn't describe it as perfect at the moment but it suffices. You can also rebind keys on macOS and Windows.
 

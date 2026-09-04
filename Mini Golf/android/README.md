@@ -177,8 +177,13 @@ game:
 - **Fatal messages go to the log** (`adb logcat`), because stderr reaches nobody.
 - **The battery** comes from `SDL_GetPowerInfo()`. Android refuses an app `/sys/class/power_supply`,
   which is where the Linux build reads it.
-- **No music.** The `.m4a` tracks need a decoder this build hasn't got, the same as Linux and the
-  Switch. Sound effects work. Android's `MediaCodec` could do it; nobody has written that.
+- **The music decodes through MediaCodec.** The `.m4a` tracks are AAC, which SDL does not decode,
+  so `MediaExtractor` parses the container and `MediaCodec` decodes it — the device's own codec,
+  which is the same bargain macOS and Windows make with theirs. It needs `libmediandk`, linked on
+  the Android branch of `CMakeLists.txt`, and nothing above `music_decoder.h` knows about it.
+  Linux and the Switch still have no decoder and play the sound effects only.
+- **The audio trace goes to the log.** `MINIGOLF_TRACE_AUDIO` writes to stderr, which reaches
+  nobody here, so on Android it goes through `SDL_Log` and comes out of `adb logcat`.
 Not on that list, though it is the thing this port most often gets asked about: the compiler is
 told `-ffp-contract=off`. Clang on ARM would otherwise fuse a multiply and an add into one
 instruction that rounds once instead of twice, shifting about one pixel in five hundred by a
