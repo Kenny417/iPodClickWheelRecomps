@@ -47,17 +47,13 @@ if [ "${1:-}" = "clean" ] || [ "${2:-}" = "clean" ]; then
 fi
 
 # ---------------------------------------------------------------------------------------------
-# The native side. -ffp-contract=off so the rasteriser rounds the way every other build of it
-# does: clang on ARM fuses a multiply and an add into one instruction that rounds once instead of
-# twice, which is faster and shifts about one pixel in five hundred by a single value. That is
-# invisible to play and fatal to comparing a frame against another machine's, which is how this
-# port is checked.
+# The native side. Nothing here asks for -ffp-contract=off any more: it is on ipod_core in
+# ../common/CMakeLists.txt, so every build of every title rounds the same way, not just this one.
 # ---------------------------------------------------------------------------------------------
 cmake -B "$build" -G Ninja -S "$here" \
     -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
     -DANDROID_ABI="$abi" \
     -DANDROID_PLATFORM=android-21 \
-    -DCMAKE_CXX_FLAGS=-ffp-contract=off \
     -DSDL3_DIR="$SDL3_ANDROID/lib/cmake/SDL3" > /dev/null
 cmake --build "$build" --target minigolf
 

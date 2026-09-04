@@ -62,7 +62,9 @@ image="$copy/$GAME_IMAGE_PATH"
 GAME_DIR=$copy
 
 # The title screen shows the time of day, so the recordings depend on the hour they were made
-# at (a one-digit hour). --time pins the game's clock to one.
+# at (a one-digit hour). --time pins the game's clock to one, and --battery pins the gauge
+# drawn beside it, which is the other half of the same problem: a picture taken on a laptop
+# at 80% is not the picture taken on one at 74%.
 clock=07:53
 
 # The emulator runs the frame on which the script says `quit`, so the frame count is one more

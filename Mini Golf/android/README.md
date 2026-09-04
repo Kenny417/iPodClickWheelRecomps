@@ -179,11 +179,13 @@ game:
   which is where the Linux build reads it.
 - **No music.** The `.m4a` tracks need a decoder this build hasn't got, the same as Linux and the
   Switch. Sound effects work. Android's `MediaCodec` could do it; nobody has written that.
-- **`-ffp-contract=off`** is passed to the compiler. Clang on ARM fuses a multiply and an add
-  into one instruction that rounds once instead of twice, which is faster and shifts about one
-  pixel in five hundred by a single value — invisible to play, and enough to stop a frame from
-  this build matching a frame from another machine's, which is one of the ways this port is
-  checked.
+Not on that list, though it is the thing this port most often gets asked about: the compiler is
+told `-ffp-contract=off`. Clang on ARM would otherwise fuse a multiply and an add into one
+instruction that rounds once instead of twice, shifting about one pixel in five hundred by a
+single value — invisible to play, and enough to stop a frame from this build matching a frame
+from another machine's, which is one of the ways this port is checked. It is not an Android
+setting: it is on `ipod_core` in `common/CMakeLists.txt`, so every build of every title on every
+platform rounds the same way, and nothing here has to ask for it.
 
 ## If it doesn't work
 
