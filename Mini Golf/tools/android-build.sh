@@ -80,6 +80,20 @@ mkdir -p "$stage/lib/$abi"
 icon="$here/android/icon.png"
 manifest="$stage/AndroidManifest.xml"
 cp "$here/android/AndroidManifest.xml" "$manifest"
+
+# The version, from the one place it is written — the `project()` line, as ../../RELEASING.md
+# says. The manifest keeps a valid pair of its own so it still stands alone, and they are
+# replaced here so an APK can never claim a version the build does not have.
+#
+# `versionCode` has to be an integer that only ever climbs, and Android compares nothing else
+# when deciding whether one APK may replace another; the version's three parts pack into one.
+version=$(sed -n 's/^project(minigolf VERSION \([0-9][0-9.]*\).*/\1/p' "$here/CMakeLists.txt")
+if [ -n "$version" ]; then
+    code=$(echo "$version" | awk -F. '{printf "%d", $1 * 10000 + $2 * 100 + $3}')
+    sed -i "s|android:versionCode=\"[^\"]*\"|android:versionCode=\"$code\"|" "$manifest"
+    sed -i "s|android:versionName=\"[^\"]*\"|android:versionName=\"$version\"|" "$manifest"
+    echo "android-build.sh: version $version (versionCode $code)"
+fi
 resources=""
 if [ -f "$icon" ]; then
     mkdir -p "$stage/res/mipmap-xxxhdpi"
