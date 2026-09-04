@@ -198,6 +198,18 @@ WHAT ELSE IS IN HERE
   COPYING.txt        the GNU General Public License, version 3, which this program is under.
   SDL3-LICENSE.txt   SDL3's licence. The program uses SDL for its window, input and sound, and
                      that licence asks to travel with it.
+FOOTER
+
+# Only the Android build carries its C++ standard library inside the program; every other
+# platform's comes from the system it runs on, and so is not in the download to be licensed.
+if [ "$platform" = android ]; then
+    cat <<'EXTRA'
+  LIBCXX-LICENSE.txt libc++'s licence. This build links the C++ standard library into the
+                     program rather than loading the device's, so a copy of it is in here.
+EXTRA
+fi
+
+cat <<'FOOTER'
 
 LICENCE
 -------

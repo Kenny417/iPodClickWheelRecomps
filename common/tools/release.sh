@@ -236,6 +236,9 @@ package_android() {  # dir exe display folder datadir linuxdir
     rm -rf "$stage"; mkdir -p "$stage"
     cp "$apk" "$stage/"
     cp "$here/common/licenses/SDL3-LICENSE.txt" "$stage/"
+    # Android is the one platform whose build links the C++ standard library into the program
+    # instead of loading the system's, so the only artifact that has to carry its licence.
+    cp "$here/common/licenses/LIBCXX-LICENSE.txt" "$stage/"
     cp "$here/LICENSE" "$stage/COPYING.txt"
     "$tools/artifact-readme.sh" "$display" "$version" android "$folder" "$datadir" "$exe" "$linuxdir" \
         > "$stage/README.txt"
