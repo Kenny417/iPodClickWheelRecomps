@@ -55,7 +55,10 @@ public:
 
 private:
     void* handle_ = nullptr;  // the decoder's own, whatever this platform's is
-    int channels_ = 0;
+    // Only a build that has a decoder reads this back. On one that has none the whole class is
+    // the honest nothing described above, and clang — which GCC does not follow here — counts an
+    // untouched private field as a warning, which is an error in this project.
+    [[maybe_unused]] int channels_ = 0;
 };
 
 }  // namespace ipod::platform
