@@ -779,10 +779,15 @@ public:
             data_directory() + "/" + gamedata::GAME_DIRECTORY_NAME;
         std::string why = "they are not there";
         (void)gamedata::verify_installed(game_dir, why);
-        const std::string message = prompt + "\n\nThe game's own files cannot be used:\n    " +
-                                    why + "\n\nCopy the folder \"" +
-                                    gamedata::GAME_DIRECTORY_NAME + "\" from your iPod to\n    " +
-                                    game_dir + "\n\nthen start this again.";
+        // Both names are offered because both are accepted (gamedata/manifest.h): the folder is
+        // `88888` on the iPod and carries the game's own name in the copy most people have, and
+        // being told to rename it when the game would have taken it either way is a waste of
+        // somebody's evening.
+        const std::string message =
+            prompt + "\n\nThe game's own files cannot be used:\n    " + why +
+            "\n\nPut the game's folder — named either \"" + gamedata::GAME_DIRECTORY_NAME +
+            "\" or \"" + gamedata::GAME_DIRECTORY_ALIAS + "\" — in\n    " + data_directory() +
+            "\n\nthen start this again.";
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", message.c_str());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mini Golf", message.c_str(), window_);
         (void)extension;
