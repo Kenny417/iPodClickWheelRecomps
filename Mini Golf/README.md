@@ -110,7 +110,7 @@ with three things in place beforehand (the script says which one is missing, if 
     ~/Android/Sdk                the platform and build-tools for API 35
     ~/Android/sdl3/prefix        SDL3's Android release, unpacked
 
-Copy your `88888` folder to `/sdcard/Android/data/org.ipodrecomp.minigolf/files/88888` and start
+Copy your `88888` or `Mini Golf` folder to `/sdcard/Android/data/org.ipodrecomp.minigolf/files/` and start
 it; if it isn't there the app says so on screen, with the path, the way the Switch build does.
 
 The D-pad turns the wheel, A selects, B is Menu. There's no settings window, the same as Linux,
@@ -118,9 +118,6 @@ and names are spelled out on the wheel rather than with the on-screen keyboard, 
 Switch. The background music does play: Android's own MediaCodec decodes the `.m4a` tracks. The launcher icon is the game's own artwork and so is not in this
 repository: `tools/android-icon.py` makes it from a copy you supply, and without it the app
 simply gets the system's default icon.
-
-This has run on a Retroid Pocket Nova (Snapdragon 8 Gen 2, Android 13). It's arm64 only, which
-is every Android handheld worth playing this on.
 
 ## Legal
 

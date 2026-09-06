@@ -38,16 +38,9 @@ NEW-RECOMP.md
 # pattern here could pick out without also matching something of the project's own. So the two
 # folders a copy arrives in are named outright, as they are spelled by the preservation project
 # that people get them from, along with iTunes' own package for a single title.
-#
-# This matters more than an ordinary ignore rule: nothing in this repository may contain any of
-# those files (see README.md, "Legal"), and a folder of them beside the source is exactly what a
-# `git add -A` would sweep in — several gigabytes of somebody else's copyrighted work, in a
-# public repository, in one command.
 *.bin
 *.eapp
 *.ipg
-/iPod Games Files/
-/iTunes Games Files/
 
 # Original game artwork, packaged into the Switch and Android ports by the person building it.
 Mini Golf/src/platform/switch/icon.jpg
